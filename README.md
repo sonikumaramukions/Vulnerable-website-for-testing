@@ -1,5 +1,5 @@
 # Student Information System - Localhost Deployment
-
+--> after cloning the repo , make sure you install node modules in backend folder.
 A web application for student information management with login functionality.
 
 ## Quick Start
