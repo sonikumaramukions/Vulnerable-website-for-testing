@@ -1,0 +1,59 @@
+╔══════════════════════════════════════════════════════════════╗
+║     Student Information System - Quick Start Commands      ║
+╚══════════════════════════════════════════════════════════════╝
+
+STEP 1: Start Backend Server
+─────────────────────────────
+Open a terminal and run:
+
+    cd /home/soni-lap/Desktop/Final_Ethical_hacking_project/vulnerable-sic/backend
+    node server.js
+
+You should see:
+    ✓ Connected to SQLite DB
+    ✓ Vulnerable SIC backend listening on http://0.0.0.0:3000
+
+Keep this terminal OPEN!
+
+
+STEP 2: Open Frontend
+──────────────────────
+Your Live Server is already running at:
+    http://127.0.0.1:5500/vulnerable-sic/frontend/index.html
+
+Or open directly:
+    vulnerable-sic/frontend/index.html
+
+
+STEP 3: Login
+─────────────
+Use any of these credentials:
+
+    Student ID: STU001    Password: rahul123
+    Student ID: STU002    Password: priya123
+    Student ID: STU010    Password: soni123
+    Student ID: STU003    Password: arjun123
+
+    Admin:     admin      Password: admin123
+
+
+TROUBLESHOOTING
+───────────────
+If you see "Connection error":
+    1. Make sure backend is running (Step 1)
+    2. Check browser console (F12) for errors
+    3. Verify backend is on port 3000
+
+If database is missing:
+    cd vulnerable-sic/backend
+    node seed.js
+    node server.js
+
+
+QUICK COPY-PASTE COMMANDS
+─────────────────────────
+# Terminal 1 - Backend
+cd /home/soni-lap/Desktop/Final_Ethical_hacking_project/vulnerable-sic/backend && node server.js
+
+# If database needs reset
+cd /home/soni-lap/Desktop/Final_Ethical_hacking_project/vulnerable-sic/backend && node seed.js && node server.js
