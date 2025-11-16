@@ -1,0 +1,2757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tripati Group of Institutions - Student Information System</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- Chart.js (without source map to avoid 404 warnings) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<!-- API Configuration -->
+<script src="config.js"></script>
+
+<style>
+
+/* GLOBAL THEME */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background: #f1f5f9;
+  color: #1e293b;
+  min-height: 100vh;
+}
+
+/* When login page is active, hide body gradient */
+body.login-active {
+  background: #000000;
+}
+
+/* MAIN COLOR PALETTE */
+:root {
+  --primary: #4F46E5;
+  --secondary: #10B981;
+  --accent: #F59E0B;
+  --text-dark: #1e293b;
+  --text-light: #64748b;
+  --bg-card: #ffffff;
+}
+
+/* NAVBAR */
+.navbar {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 15px 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  box-sizing: border-box;
+  min-height: 60px;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.nav-left img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+}
+
+.nav-title {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav-right i {
+  font-size: 20px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.nav-right i:hover {
+  opacity: 0.8;
+}
+
+/* PAGE CONTAINER */
+.page {
+  display: none;
+  padding: 30px;
+  min-height: calc(100vh - 60px);
+  box-sizing: border-box;
+}
+
+.active-page {
+  display: block;
+}
+
+/* Main content pages have sidebar margin */
+#mainContent .page {
+  margin-left: 250px; /* Make room for sidebar */
+  width: calc(100% - 250px);
+  box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+  #mainContent .page {
+    margin-left: 0;
+    width: 100%;
+    padding: 20px;
+  }
+}
+
+/* Login page has no margin and should be on top */
+#loginPage {
+  margin-left: 0 !important;
+  z-index: 10000;
+}
+
+/* Ensure sidebar and navbar are hidden when login page is active */
+#loginPage.active-page ~ #mainNavbar,
+#loginPage.active-page ~ #sidebarNav,
+#loginPage.active-page ~ #mainContent {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* CARDS */
+.card {
+  background: var(--bg-card);
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0px 2px 12px rgba(0,0,0,0.08);
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.card:hover {
+  box-shadow: 0px 8px 24px rgba(0,0,0,0.12);
+  transform: translateY(-4px);
+  border-color: #cbd5e1;
+}
+
+.card h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: var(--text-dark);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.card h1 {
+  margin: 10px 0;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.card h2 {
+  margin: 10px 0;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.card h4 {
+  margin: 10px 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.card p {
+  margin: 8px 0;
+  line-height: 1.6;
+}
+
+.card ul, .card ol {
+  margin: 10px 0;
+  padding-left: 20px;
+  line-height: 1.8;
+}
+
+.card li {
+  margin: 5px 0;
+}
+
+/* TABLES */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  font-size: 14px;
+}
+
+table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+table thead th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.2);
+  line-height: 1.4;
+}
+
+table tbody td {
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  line-height: 1.5;
+  vertical-align: middle;
+}
+
+table tbody tr {
+  transition: background 0.2s ease;
+}
+
+table tbody tr:hover {
+  background: #f8fafc;
+}
+
+table tbody tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+table tbody tr:nth-child(even):hover {
+  background: #f1f5f9;
+}
+
+/* INPUT FIELDS */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+input[type="month"],
+input[type="file"],
+textarea,
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  line-height: 1.5;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="month"]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: var(--text-dark);
+  font-size: 14px;
+}
+
+/* HR STYLING */
+hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 20px 0;
+}
+
+/* SMALL TEXT */
+small {
+  font-size: 12px;
+  line-height: 1.5;
+  display: block;
+  margin-top: 4px;
+}
+
+/* ALIGNMENT FIXES */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.user-info span {
+  white-space: nowrap;
+}
+
+.user-info button {
+  white-space: nowrap;
+}
+
+/* GRID */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1400px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* BUTTONS */
+.btn {
+  padding: 10px 18px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: var(--secondary);
+}
+
+.btn-accent {
+  background: var(--accent);
+}
+
+/* SECTION TITLE */
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  margin-top: 0;
+  color: var(--text-dark);
+  line-height: 1.3;
+}
+
+/* HIDDEN */
+.hidden {
+  display: none;
+}
+
+/* LOGIN PAGE */
+#loginPage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #000000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10000;
+}
+
+.login-container {
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: var(--primary);
+}
+
+.login-form input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.login-form input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.login-form button {
+  width: 100%;
+  padding: 12px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.login-form button:hover {
+  opacity: 0.9;
+}
+
+.error-message {
+  color: #ef4444;
+  text-align: center;
+  margin-top: 10px;
+  display: none;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+}
+
+/* Success Message */
+.success-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 30px 50px;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  z-index: 10000;
+  text-align: center;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.success-message h2 {
+  margin: 0 0 10px 0;
+  font-size: 24px;
+}
+
+.success-message p {
+  margin: 0;
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+.success-message i {
+  font-size: 48px;
+  margin-bottom: 15px;
+  display: block;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- SUCCESS MESSAGE (hidden by default) -->
+<div id="loginSuccess" class="success-message hidden">
+  <i class="fa fa-check-circle"></i>
+  <h2>Login Successful!</h2>
+  <p id="successStudentName">Welcome back!</p>
+</div>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="page active-page">
+  <div class="login-container">
+    <div style="text-align: center; margin-bottom: 10px;">
+      <h3 style="color: var(--primary); margin: 0 0 5px 0; font-size: 18px; font-weight: 600;">Tripati Group of Institutions</h3>
+      <p style="color: var(--text-light); margin: 0; font-size: 12px;">Student Information System</p>
+    </div>
+    <h2 style="text-align: center; margin-top: 20px; margin-bottom: 30px;"><i class="fa fa-graduation-cap"></i> Student Login</h2>
+    <form class="login-form" onsubmit="handleLogin(event)">
+      <input type="text" id="loginUsername" placeholder="Student ID (e.g., STU001)" required>
+      <input type="password" id="loginPassword" placeholder="Password" required>
+      <button type="submit"><i class="fa fa-sign-in-alt"></i> Login</button>
+      <div class="error-message" id="loginError"></div>
+    </form>
+    <p style="text-align: center; margin-top: 20px; color: var(--text-light); font-size: 14px;">
+      Example: STU001 / rahul123
+    </p>
+    <p style="text-align: center; margin-top: 10px; color: var(--text-light); font-size: 12px;">
+      <i class="fa fa-info-circle"></i> Make sure backend server is running on port 3000
+    </p>
+  </div>
+</div>
+
+<!-- NAVBAR (hidden until login) - positioned after login page -->
+<div class="navbar hidden" id="mainNavbar" style="display: none;">
+  <div class="nav-left">
+    <img src="https://i.imgur.com/4AiXzf8.png" alt="logo">
+    <span class="nav-title">Tripati Group of Institutions</span>
+  </div>
+
+  <div class="nav-right">
+    <div class="user-info">
+      <span id="navStudentName">Student</span>
+      <i class="fa fa-user-circle"></i>
+      <button class="btn" onclick="handleLogout()" style="padding: 5px 10px; font-size: 12px; margin-left: 10px;">Logout</button>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR NAVIGATION (hidden until login) -->
+<div class="sidebar hidden" id="sidebarNav" style="display: none; position: fixed; left: 0; top: 60px; width: 250px; height: calc(100vh - 60px); background: #1e293b; color: white; padding: 20px; z-index: 999; overflow-y: auto; box-sizing: border-box;">
+  <div style="margin-bottom: 30px;">
+    <h3 style="color: #60a5fa; margin-bottom: 20px;"><i class="fa fa-bars"></i> Menu</h3>
+    <nav style="display: flex; flex-direction: column; gap: 10px;">
+      <a href="#" onclick="goToPage('dashboardPage'); return false;" class="nav-link" data-page="dashboardPage" style="padding: 12px; border-radius: 8px; color: white; text-decoration: none; display: flex; align-items: center; gap: 10px; transition: 0.2s;">
+        <i class="fa fa-home"></i> Dashboard
+      </a>
+      <a href="#" onclick="goToPage('profilePage'); return false;" class="nav-link" data-page="profilePage" style="padding: 12px; border-radius: 8px; color: white; text-decoration: none; display: flex; align-items: center; gap: 10px; transition: 0.2s;">
+        <i class="fa fa-user"></i> My Profile
+      </a>
+      <a href="#" onclick="goToPage('attendancePage'); return false;" class="nav-link" data-page="attendancePage" style="padding: 12px; border-radius: 8px; color: white; text-decoration: none; display: flex; align-items: center; gap: 10px; transition: 0.2s;">
+        <i class="fa fa-calendar-check"></i> Attendance
+      </a>
+      <a href="#" onclick="goToPage('marksPage'); return false;" class="nav-link" data-page="marksPage" style="padding: 12px; border-radius: 8px; color: white; text-decoration: none; display: flex; align-items: center; gap: 10px; transition: 0.2s;">
+        <i class="fa fa-graduation-cap"></i> Marks & Grades
+      </a>
+      <a href="#" onclick="goToPage('feesPage'); return false;" class="nav-link" data-page="feesPage" style="padding: 12px; border-radius: 8px; color: white; text-decoration: none; display: flex; align-items: center; gap: 10px; transition: 0.2s;">
+        <i class="fa fa-credit-card"></i> Fee Payment
+      </a>
+      <a href="#" onclick="goToPage('libraryPage'); return false;" class="nav-link" data-page="libraryPage" style="padding: 12px; border-radius: 8px; color: white; text-decoration: none; display: flex; align-items: center; gap: 10px; transition: 0.2s;">
+        <i class="fa fa-book"></i> Library
+      </a>
+      <a href="#" onclick="goToPage('feedbackPage'); return false;" class="nav-link" data-page="feedbackPage" style="padding: 12px; border-radius: 8px; color: white; text-decoration: none; display: flex; align-items: center; gap: 10px; transition: 0.2s;">
+        <i class="fa fa-comment"></i> Feedback
+      </a>
+    </nav>
+  </div>
+</div>
+
+<style>
+.nav-link {
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.nav-link:hover {
+  background: #334155 !important;
+  transform: translateX(5px);
+}
+
+.nav-link.active {
+  background: var(--primary) !important;
+  font-weight: 600;
+}
+
+.sidebar {
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar h3 {
+  margin: 0 0 20px 0;
+  padding: 0;
+  line-height: 1.4;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+</style>
+
+<!-- MAIN PAGES START HERE (hidden until login) -->
+<div id="mainContent" class="hidden">
+<!-- ============================= -->
+<!-- DASHBOARD PAGE CONTENT START -->
+<!-- ============================= -->
+<div id="dashboardPage" class="page">
+
+  <div style="margin-bottom: 30px;">
+    <h2 class="section-title" style="margin-bottom: 10px;">Welcome, <span id="welcomeStudent">Student</span>!</h2>
+    <p style="color: var(--text-light); margin: 0; font-size: 15px; line-height: 1.6;">Student ID: <span id="dashStudentId" style="font-weight: 600; color: var(--primary);">-</span> | Department: <span id="dashDept" style="font-weight: 600; color: var(--primary);">-</span> | <span id="dashSemester" style="font-weight: 600; color: var(--primary);">-</span></p>
+  </div>
+
+  <!-- TOP SUMMARY CARDS -->
+  <div class="grid-4">
+    <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; cursor: pointer; min-height: 150px; display: flex; flex-direction: column; justify-content: space-between;" onclick="goToPage('attendancePage')">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+        <h3 style="color: white; margin: 0; font-size: 16px;">Total Attendance</h3>
+        <i class="fa fa-calendar-check" style="font-size: 24px; opacity: 0.8;"></i>
+      </div>
+      <h1 id="dashAttendance" style="color: white; margin: 10px 0; font-size: 36px; line-height: 1.2;">-</h1>
+      <small style="opacity: 0.9; margin-top: auto;">Click to view details</small>
+    </div>
+
+    <div class="card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; cursor: pointer; min-height: 150px; display: flex; flex-direction: column; justify-content: space-between;" onclick="goToPage('marksPage')">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+        <h3 style="color: white; margin: 0; font-size: 16px;">CGPA</h3>
+        <i class="fa fa-graduation-cap" style="font-size: 24px; opacity: 0.8;"></i>
+      </div>
+      <h1 id="dashCGPA" style="color: white; margin: 10px 0; font-size: 36px; line-height: 1.2;">-</h1>
+      <small style="opacity: 0.9; margin-top: auto;">Click to view marks</small>
+    </div>
+
+    <div class="card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; cursor: pointer; min-height: 150px; display: flex; flex-direction: column; justify-content: space-between;" onclick="goToPage('feesPage')">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+        <h3 style="color: white; margin: 0; font-size: 16px;">Pending Fees</h3>
+        <i class="fa fa-credit-card" style="font-size: 24px; opacity: 0.8;"></i>
+      </div>
+      <h1 id="dashPendingFees" style="color: white; margin: 10px 0; font-size: 36px; line-height: 1.2;">-</h1>
+      <small style="opacity: 0.9; margin-top: auto;">Click to pay fees</small>
+    </div>
+
+    <div class="card" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; cursor: pointer; min-height: 150px; display: flex; flex-direction: column; justify-content: space-between;" onclick="goToPage('libraryPage')">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+        <h3 style="color: white; margin: 0; font-size: 16px;">Library Books</h3>
+        <i class="fa fa-book" style="font-size: 24px; opacity: 0.8;"></i>
+      </div>
+      <h1 id="dashBooks" style="color: white; margin: 10px 0; font-size: 36px; line-height: 1.2;">-</h1>
+      <small style="opacity: 0.9; margin-top: auto;">Click to view books</small>
+    </div>
+  </div>
+
+
+  <!-- CHARTS ROW -->
+  <div class="grid-2">
+
+    <!-- Attendance Chart -->
+    <div class="card">
+      <h3>Attendance Trend (Last 6 Months)</h3>
+      <canvas id="attendanceChart"></canvas>
+    </div>
+
+    <!-- Top Subjects Chart -->
+    <div class="card">
+      <h3>Top 5 Performing Subjects</h3>
+      <canvas id="subjectsChart"></canvas>
+    </div>
+
+  </div>
+
+  <!-- UPCOMING ASSIGNMENTS -->
+  <div class="card">
+    <h3>Upcoming Assignments & Deadlines</h3>
+    <ul id="assignmentList" style="line-height: 1.9;">
+      <li><i class="fa fa-book"></i> Data Structures Lab – <b>Due: 18 Nov</b></li>
+      <li><i class="fa fa-file-alt"></i> DBMS Mini Project – <b>Due: 20 Nov</b></li>
+      <li><i class="fa fa-pencil"></i> Operating Systems Test – <b>22 Nov</b></li>
+      <li><i class="fa fa-code"></i> Web Tech Assignment – <b>25 Nov</b></li>
+    </ul>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="card">
+    <h3>Quick Actions</h3>
+    <div class="grid-4">
+      <button class="btn" onclick="goToPage('profilePage')" style="padding: 15px; font-size: 14px;">
+        <i class="fa fa-user"></i> My Profile
+      </button>
+      <button class="btn" onclick="goToPage('attendancePage')" style="padding: 15px; font-size: 14px;">
+        <i class="fa fa-calendar-check"></i> Attendance
+      </button>
+      <button class="btn" onclick="goToPage('marksPage')" style="padding: 15px; font-size: 14px;">
+        <i class="fa fa-graduation-cap"></i> Marks & Grades
+      </button>
+      <button class="btn" onclick="goToPage('feesPage')" style="padding: 15px; font-size: 14px;">
+        <i class="fa fa-credit-card"></i> Fee Payment
+      </button>
+    </div>
+    <div class="grid-4" style="margin-top: 15px;">
+      <button class="btn-secondary" onclick="goToPage('libraryPage')" style="padding: 15px; font-size: 14px;">
+        <i class="fa fa-book"></i> Library
+      </button>
+      <button class="btn-secondary" onclick="goToPage('feedbackPage')" style="padding: 15px; font-size: 14px;">
+        <i class="fa fa-comment"></i> Feedback
+      </button>
+      <button class="btn-secondary" onclick="goToPage('timetablePage')" style="padding: 15px; font-size: 14px;">
+        <i class="fa fa-calendar"></i> Timetable
+      </button>
+      <button class="btn-secondary" onclick="goToPage('idCardPage')" style="padding: 15px; font-size: 14px;">
+        <i class="fa fa-id-card"></i> ID Card
+      </button>
+    </div>
+  </div>
+
+</div>
+<!-- =========================== -->
+<!-- DASHBOARD PAGE CONTENT END -->
+<!-- =========================== -->
+<!-- ============================= -->
+<!-- STUDENT PROFILE PAGE START -->
+<!-- ============================= -->
+<div id="profilePage" class="page">
+
+  <h2 class="section-title">Student Profile</h2>
+
+  <div class="grid-2">
+
+    <!-- LEFT CARD: Profile Photo + Basic Info -->
+    <div class="card" style="text-align:center;">
+      <img id="profilePhoto" src="https://i.imgur.com/4AiXzf8.png" 
+           style="width:140px;height:140px;border-radius:50%;object-fit:cover;border:4px solid var(--primary);">
+
+      <h2 id="studentName" style="margin:10px 0;">John Doe</h2>
+      <p id="studentRoll" style="color:var(--text-light);">Roll No: STU001</p>
+
+      <!-- Vulnerable Upload -->
+      <input type="file" id="photoInput" style="margin-top:10px;" />
+      <button class="btn" onclick="uploadProfilePhoto()">Upload New Photo</button>
+
+      <hr style="margin:20px 0;">
+
+      <h3>Social Links</h3>
+      <input type="text" id="linkedin" placeholder="LinkedIn URL" class="input">
+      <input type="text" id="github" placeholder="GitHub URL" class="input">
+      <button class="btn-secondary" onclick="saveSocial()">Save Links</button>
+    </div>
+
+
+    <!-- RIGHT CARD: Bio, Achievements & Details -->
+    <div class="card">
+
+      <h3>About Me <small style="color:var(--accent);">(XSS vulnerable)</small></h3>
+      <textarea id="bioInput" style="width:100%;height:100px;border-radius:8px;padding:10px;"></textarea>
+      <button class="btn" onclick="saveBio()">Save Bio</button>
+
+      <h3 style="margin-top:25px;">Achievements</h3>
+      <ul id="achievementList" style="line-height:1.8;">
+        <li><i class="fa fa-trophy" style="color:var(--accent);"></i> Hackathon Winner 2024</li>
+        <li><i class="fa fa-medal" style="color:var(--primary);"></i> Merit Scholarship Holder</li>
+        <li><i class="fa fa-star" style="color:#eab308;"></i> Top 10 in Coding Challenge</li>
+      </ul>
+
+      <h3 style="margin-top:25px;">Enrollment Details</h3>
+      <p><b>Department:</b> <span data-field="dept">Computer Science & Engineering</span></p>
+      <p><b>Semester:</b> <span data-field="semester">4</span></p>
+      <p><b>Batch:</b> <span data-field="batch">2023-2027</span></p>
+      <p><b>Email:</b> <span data-field="email">student@example.edu</span></p>
+      <p><b>Phone:</b> <span data-field="phone">+91 9000000000</span></p>
+      <p><b>City:</b> <span data-field="city">City</span></p>
+
+      <h3 style="margin-top:25px;">Course Progress</h3>
+      <div style="background:#e2e8f0;width:100%;height:12px;border-radius:50px;">
+        <div id="progressBar" style="height:12px;border-radius:50px;background:var(--primary);width:65%;"></div>
+      </div>
+
+      <h3 style="margin-top:25px;">Emergency Contact</h3>
+      <p><b>Father:</b> Rajesh Kumar</p>
+      <p><b>Phone:</b> +91 98765 43210</p>
+      <p><b>Address:</b> Hyderabad, Telangana</p>
+
+    </div>
+
+  </div>
+
+</div>
+<!-- =========================== -->
+<!-- STUDENT PROFILE PAGE END -->
+<!-- =========================== -->
+<!-- ============================= -->
+<!-- ATTENDANCE PAGE START -->
+<!-- ============================= -->
+<div id="attendancePage" class="page">
+
+  <div style="margin-bottom: 30px;">
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+      <div style="width: 4px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 2px;"></div>
+      <h2 class="section-title" style="margin: 0; font-size: 28px; font-weight: 700; color: var(--text-dark);">Attendance Report</h2>
+    </div>
+    <p style="color: var(--text-light); margin-left: 19px; font-size: 15px;">
+      <i class="fa fa-user" style="margin-right: 6px;"></i>
+      Viewing attendance for: <strong id="attendanceStudentName" style="color: var(--primary);">-</strong>
+    </p>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- Attendance Summary -->
+    <div class="card" style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <h3 style="margin: 0; color: var(--text-dark);">Attendance Overview</h3>
+        <i class="fa fa-calendar-check" style="font-size: 24px; color: var(--primary);"></i>
+      </div>
+      
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+        <p style="color: white; margin: 0 0 8px 0; font-size: 14px; opacity: 0.9;">Total Attendance</p>
+        <p style="color: white; margin: 0; font-size: 36px; font-weight: 700;">
+          <span id="attendancePercent" style="color: white;">-</span>
+        </p>
+      </div>
+
+      <div style="margin-bottom: 20px; padding: 12px; background: #fef3c7; border-left: 4px solid var(--accent); border-radius: 4px;">
+        <p style="margin: 0; font-size: 13px;">
+          <b>Low Attendance Warning:</b>  
+          <span style="color:var(--accent);">Enabled (vulnerable email spoofing)</span>
+        </p>
+      </div>
+
+      <hr style="margin: 20px 0;">
+
+      <h3 style="margin-bottom: 15px; color: var(--text-dark);">Subject-wise Attendance</h3>
+      <ul id="attendanceSubjects" style="list-style: none; padding: 0; margin: 0; line-height:1.9;">
+        <li style="padding: 12px; text-align: center; color: var(--text-light);">
+          <i class="fa fa-spinner fa-spin"></i> Loading subject data...
+        </li>
+      </ul>
+    </div>
+
+    <!-- Attendance Chart -->
+    <div class="card" style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <h3 style="margin: 0; color: var(--text-dark);">Attendance by Subject</h3>
+        <i class="fa fa-chart-bar" style="font-size: 24px; color: var(--primary);"></i>
+      </div>
+      <div style="position: relative; height: 300px;">
+        <canvas id="attendanceBarChart"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Detailed Attendance Table -->
+  <div class="card" style="margin-top:20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <h3 style="margin: 0;">Detailed Attendance Records</h3>
+      <small style="color:var(--accent);">Endpoint: <b>/api/student/attendance/:id</b> (No Auth, IDOR)</small>
+    </div>
+
+    <div style="overflow-x: auto;">
+      <table style="width:100%;border-collapse:collapse;min-width: 600px;">
+        <thead>
+          <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <th style="padding:12px;border:1px solid rgba(255,255,255,0.2);text-align:left;font-weight:600;">Date</th>
+            <th style="padding:12px;border:1px solid rgba(255,255,255,0.2);text-align:left;font-weight:600;">Subject</th>
+            <th style="padding:12px;border:1px solid rgba(255,255,255,0.2);text-align:left;font-weight:600;">Status</th>
+          </tr>
+        </thead>
+        <tbody id="attendanceTable">
+          <tr>
+            <td colspan="3" style="text-align:center;padding:30px;color:var(--text-light);">
+              <i class="fa fa-spinner fa-spin" style="margin-right: 8px;"></i>Loading attendance data...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+<!-- ============================= -->
+<!-- ATTENDANCE PAGE END -->
+<!-- ============================= -->
+
+
+
+
+<!-- ============================= -->
+<!-- MARKS PAGE START -->
+<!-- ============================= -->
+<div id="marksPage" class="page">
+
+  <div style="margin-bottom: 20px;">
+    <h2 class="section-title">Marks & Results</h2>
+    <p style="color: var(--text-light);">Academic performance for: <strong id="marksStudentName">-</strong></p>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- Marks Summary -->
+    <div class="card">
+      <h3>Performance Summary</h3>
+
+      <p><b>Overall Grade:</b> <span id="marksOverallGrade" style="color:var(--primary);font-size:20px;">A</span></p>
+      <p><b>CGPA:</b> <span id="marksCGPA" style="color:var(--secondary);font-size:20px;">8.7</span></p>
+
+      <hr>
+
+      <h3>Exam Types</h3>
+      <ul style="line-height:1.9;">
+        <li>Mid-Term</li>
+        <li>End-Term</li>
+        <li>Assignments</li>
+        <li>Lab Exams</li>
+      </ul>
+
+      <hr>
+
+      <p style="color:var(--accent);">
+        Vulnerable Endpoint: <b>/api/student/marks/:id</b> (SQLi)
+      </p>
+    </div>
+
+
+    <!-- Marks Chart -->
+    <div class="card">
+      <h3>Subject-wise Marks</h3>
+      <canvas id="marksChart"></canvas>
+    </div>
+
+  </div>
+
+
+  <!-- Detailed Marks Table -->
+  <div class="card" style="margin-top:20px;">
+    <h3>Marks Sheet</h3>
+
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#e2e8f0;">
+          <th style="padding:10px;border:1px solid #cbd5e1;">Subject</th>
+          <th style="padding:10px;border:1px solid #cbd5e1;">Marks</th>
+          <th style="padding:10px;border:1px solid #cbd5e1;">Grade</th>
+        </tr>
+      </thead>
+      <tbody id="marksTable">
+        <!-- Example -->
+        <tr>
+          <td style="padding:10px;border:1px solid #cbd5e1;">Data Structures</td>
+          <td style="padding:10px;border:1px solid #cbd5e1;">87</td>
+          <td style="padding:10px;border:1px solid #cbd5e1;">A</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+  <!-- Fake Result Download -->
+  <div class="card" style="margin-top:20px;text-align:center;">
+    <button class="btn-accent">
+      <i class="fa fa-download"></i> Download Result PDF (fake)
+    </button>
+  </div>
+
+</div>
+<!-- ============================= -->
+<!-- MARKS PAGE END -->
+<!-- ============================= -->
+<!-- ============================= -->
+<!-- FEES PAGE START -->
+<!-- ============================= -->
+<div id="feesPage" class="page">
+
+  <h2 class="section-title">Fee Management</h2>
+
+  <div class="grid-2">
+
+    <!-- LEFT CARD: Fee Summary -->
+    <div class="card">
+      <h3>Fee Summary</h3>
+
+      <p><b>Semester:</b> 4</p>
+      <p><b>Total Fees:</b> <span style="color:var(--primary);font-size:20px;">₹ 45,000</span></p>
+      <p><b>Paid:</b> <span style="color:var(--secondary);font-size:20px;">₹ 33,000</span></p>
+      <p><b>Pending:</b> <span id="feePending" style="color:var(--accent);font-size:20px;">₹ 12,000</span></p>
+
+      <hr>
+
+      <h3>Due Date</h3>
+      <p style="color:#ef4444;"><b>15 December 2024</b></p>
+
+      <h3 style="margin-top:20px;">Download</h3>
+      <button class="btn-accent" onclick="alert('Fake receipt downloaded (not real)')">
+        <i class="fa fa-download"></i> Download Last Receipt
+      </button>
+
+    </div>
+
+
+    <!-- RIGHT CARD: Payment Form -->
+    <div class="card">
+      <h3>Pay Pending Fees</h3>
+
+      <p style="color:var(--accent);"><b>VULNERABLE:</b> Payment form collects card details without encryption</p>
+
+      <label>Card Holder Name</label>
+      <input type="text" id="payName" class="input" placeholder="Name on card"
+             style="width:100%;padding:10px;border-radius:8px;margin-bottom:10px;">
+
+      <label>Card Number</label>
+      <input type="text" id="payCard" class="input" placeholder="xxxx-xxxx-xxxx-xxxx"
+             style="width:100%;padding:10px;border-radius:8px;margin-bottom:10px;">
+
+      <label>Expiry Date</label>
+      <input type="month" id="payExp" class="input"
+             style="width:100%;padding:10px;border-radius:8px;margin-bottom:10px;">
+
+      <label>CVV</label>
+      <input type="text" id="payCVV" maxlength="3" class="input"
+             style="width:100%;padding:10px;border-radius:8px;margin-bottom:10px;">
+
+      <button class="btn" onclick="processPayment()">
+        <i class="fa fa-credit-card"></i> Pay ₹ 12,000 Now
+      </button>
+    </div>
+
+  </div> <!-- grid-2 -->
+
+
+  <!-- PAYMENT HISTORY -->
+  <div class="card" style="margin-top:20px;">
+    <h3>Payment History</h3>
+
+    <p style="color:var(--accent);">Endpoint: <b>/api/student/fees/:id</b> (Information Disclosure)</p>
+
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#e2e8f0;">
+          <th style="padding:10px;border:1px solid #cbd5e1;">Date</th>
+          <th style="padding:10px;border:1px solid #cbd5e1;">Amount</th>
+          <th style="padding:10px;border:1px solid #cbd5e1;">Status</th>
+        </tr>
+      </thead>
+      <tbody id="feeHistory">
+        <tr>
+          <td style="padding:10px;border:1px solid #cbd5e1;">01 July 2024</td>
+          <td style="padding:10px;border:1px solid #cbd5e1;">₹ 20,000</td>
+          <td style="padding:10px;border:1px solid #cbd5e1;color:var(--secondary);"><b>Paid</b></td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border:1px solid #cbd5e1;">01 September 2024</td>
+          <td style="padding:10px;border:1px solid #cbd5e1;">₹ 13,000</td>
+          <td style="padding:10px;border:1px solid #cbd5e1;color:var(--secondary);"><b>Paid</b></td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border:1px solid #cbd5e1;">01 November 2024</td>
+          <td style="padding:10px;border:1px solid #cbd5e1;">₹ 12,000</td>
+          <td style="padding:10px;border:1px solid #cbd5e1;color:var(--accent);"><b>Pending</b></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+<!-- ============================= -->
+<!-- FEES PAGE END -->
+<!-- ============================= -->
+<!-- ============================= -->
+<!-- PART 6: LIBRARY, TIMETABLE & ID CARD -->
+<!-- ============================= -->
+
+<!-- ============================= -->
+<!-- LIBRARY PAGE START -->
+<!-- ============================= -->
+<div id="libraryPage" class="page">
+
+  <h2 class="section-title">Library</h2>
+
+  <div class="grid-2">
+
+    <!-- Left: My Issued Books -->
+    <div class="card">
+      <h3>Books Issued</h3>
+      <p style="color:var(--accent);">Endpoint: <b>/api/library/books?student_id=STU001</b> (IDOR / Enumeration)</p>
+
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="background:#e2e8f0;">
+            <th style="padding:8px;border:1px solid #cbd5e1;">Title</th>
+            <th style="padding:8px;border:1px solid #cbd5e1;">Issued On</th>
+            <th style="padding:8px;border:1px solid #cbd5e1;">Due Date</th>
+            <th style="padding:8px;border:1px solid #cbd5e1;">Fine</th>
+            <th style="padding:8px;border:1px solid #cbd5e1;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="issuedBooksTable">
+          <tr>
+            <td style="padding:8px;border:1px solid #cbd5e1;">Database Systems</td>
+            <td style="padding:8px;border:1px solid #cbd5e1;">01 Oct 2025</td>
+            <td style="padding:8px;border:1px solid #cbd5e1;">30 Oct 2025</td>
+            <td style="padding:8px;border:1px solid #cbd5e1;color:#ef4444;">₹ 0</td>
+            <td style="padding:8px;border:1px solid #cbd5e1;">
+              <button class="btn" onclick="returnBook('DBMS')">Return</button>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px;border:1px solid #cbd5e1;">Web Technologies</td>
+            <td style="padding:8px;border:1px solid #cbd5e1;">15 Oct 2025</td>
+            <td style="padding:8px;border:1px solid #cbd5e1;">15 Nov 2025</td>
+            <td style="padding:8px;border:1px solid #cbd5e1;color:#ef4444;">₹ 50</td>
+            <td style="padding:8px;border:1px solid #cbd5e1;">
+              <button class="btn" onclick="returnBook('WebTech')">Return</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top:12px;"><b>Fine Calculation:</b> ₹5 per day overdue (client-side calc; vulnerable to manipulation)</p>
+    </div>
+
+    <!-- Right: Search Catalog -->
+    <div class="card">
+      <h3>Search Library Catalog</h3>
+      <p style="color:var(--accent);">VULNERABLE: Search does not sanitize input — try SQLi in the search box.</p>
+      <div style="display:flex;gap:8px;">
+        <input id="libSearchInput" placeholder="Search by title/author" style="flex:1;padding:10px;border-radius:8px;">
+        <button class="btn" onclick="searchLibrary()">Search</button>
+      </div>
+
+      <div id="libSearchResults" style="margin-top:12px;"></div>
+
+      <hr style="margin-top:12px;">
+
+      <h3>Reserve Book</h3>
+      <p>No authentication required — reserve any book ID (vulnerable)</p>
+      <input id="reserveBookId" placeholder="Enter Book ID (e.g. B1001)" style="padding:10px;border-radius:8px;width:60%;">
+      <button class="btn-accent" onclick="reserveBook()">Reserve</button>
+      <div id="reserveResult" style="margin-top:10px;"></div>
+    </div>
+
+  </div> <!-- grid-2 -->
+
+  <!-- Library Catalog Sample -->
+  <div class="card" style="margin-top:20px;">
+    <h3>Popular Books</h3>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <div style="width:220px;" class="card">
+        <b>Clean Code</b><br><small>Robert C. Martin</small><br><small>ID: B1001</small>
+      </div>
+      <div style="width:220px;" class="card">
+        <b>Design Patterns</b><br><small>Gamma et al.</small><br><small>ID: B1002</small>
+      </div>
+      <div style="width:220px;" class="card">
+        <b>Database Systems</b><br><small>Ramakrishnan</small><br><small>ID: B1003</small>
+      </div>
+      <div style="width:220px;" class="card">
+        <b>Web Technologies</b><br><small>Jon Duckett</small><br><small>ID: B1004</small>
+      </div>
+    </div>
+  </div>
+
+</div>
+<!-- ============================= -->
+<!-- LIBRARY PAGE END -->
+<!-- ============================= -->
+
+
+
+<!-- ============================= -->
+<!-- TIMETABLE PAGE START -->
+<!-- ============================= -->
+<div id="timetablePage" class="page">
+
+  <h2 class="section-title">Timetable / Weekly Schedule</h2>
+
+  <div class="card">
+    <p style="color:var(--accent);">Timetable is color-coded by subject. Download as PDF (placeholder).</p>
+
+    <!-- Weekly grid: Mon-Fri x 8 slots -->
+    <table style="width:100%;border-collapse:collapse;text-align:center;">
+      <thead>
+        <tr style="background:#e2e8f0;">
+          <th style="padding:8px;border:1px solid #cbd5e1;">Time</th>
+          <th style="padding:8px;border:1px solid #cbd5e1;">Monday</th>
+          <th style="padding:8px;border:1px solid #cbd5e1;">Tuesday</th>
+          <th style="padding:8px;border:1px;border:1px solid #cbd5e1;">Wednesday</th>
+          <th style="padding:8px;border:1px solid #cbd5e1;">Thursday</th>
+          <th style="padding:8px;border:1px solid #cbd5e1;">Friday</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:10px;border:1px solid #cbd5e1;">09:00 - 10:00</td>
+          <td style="padding:10px;border:1px solid #cbd5e1;background:#fef3c7;">Mathematics<br><small>Rm 101 — Dr. Rao</small></td>
+          <td style="padding:10px;border:1px solid #cbd5e1;background:#e0f2fe;">Data Structures<br><small>Rm 201 — Prof. K</small></td>
+          <td style="padding:10px;border:1px solid #cbd5e1;background:#fef3c7;">Mathematics<br><small>Rm 101 — Dr. Rao</small></td>
+          <td style="padding:10px;border:1px solid #cbd5e1;background:#f0f9eb;">Physics Lab<br><small>Lab 3 — Ms. S</small></td>
+          <td style="padding:10px;border:1px solid #cbd5e1;background:#e9d5ff;">OS<br><small>Rm 103 — Dr. N</small></td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border:1px solid #cbd5e1;">10:00 - 11:00</td>
+          <td style="padding:10px;border:1px solid #cbd5e1;background:#e0f2fe;">Data Structures<br><small>Rm 201 — Prof. K</small></td>
+          <td style="padding:10px;border:1px solid #cbd5e1;background:#fef3c7;">DBMS<br><small>Rm 202 — Dr. P</small></td>
+          <td style="padding:10px;border:1px solid #cbd5e1;background:#e0f2fe;">Data Structures<br><small>Rm 201 — Prof. K</small></td>
+          <td style="padding:10px;border:1px solid #cbd5e1;background:#e9d5ff;">OS<br><small>Rm 103 — Dr. N</small></td>
+          <td style="padding:10px;border:1px solid #cbd5e1;background:#f0f9eb;">Web Tech<br><small>Rm 204 — Ms. L</small></td>
+        </tr>
+
+        <!-- Add more rows as needed -->
+      </tbody>
+    </table>
+
+    <div style="margin-top:12px;">
+      <button class="btn" onclick="downloadTimetablePDF()">Download as PDF</button>
+    </div>
+
+  </div>
+
+</div>
+<!-- ============================= -->
+<!-- TIMETABLE PAGE END -->
+<!-- ============================= -->
+
+
+
+<!-- ============================= -->
+<!-- ID CARD PAGE START -->
+<!-- ============================= -->
+<div id="idCardPage" class="page">
+
+  <h2 class="section-title">Student ID Card</h2>
+
+  <div class="grid-2">
+
+    <!-- ID Preview -->
+    <div class="card" style="text-align:center;">
+      <div id="idCardPreview" style="display:inline-block;padding:18px;border-radius:12px;border:1px solid #e6edf3;background:#fff;">
+        <img id="idPhotoSmall" src="https://i.imgur.com/4AiXzf8.png" style="width:90px;height:90px;border-radius:8px;object-fit:cover;">
+        <h3 id="idName">John Doe</h3>
+        <p id="idNumber">STU001</p>
+        <p id="idCourse">B.Tech CSE — Semester 4</p>
+        <div id="qrCanvas" style="margin-top:10px;"></div>
+        <p style="font-size:12px;color:var(--text-light);">Valid Till: 31 Dec 2025</p>
+      </div>
+
+      <div style="margin-top:12px;">
+        <button class="btn" onclick="downloadIDCard()">Download as Image</button>
+      </div>
+    </div>
+
+    <!-- ID Options / Info -->
+    <div class="card">
+      <h3>ID Options</h3>
+      <label>Student Name</label>
+      <input id="idNameInput" value="John Doe" style="padding:10px;border-radius:8px;">
+      <label>Student ID</label>
+      <input id="idNumberInput" value="STU001" style="padding:10px;border-radius:8px;">
+      <label>Course / Sem</label>
+      <input id="idCourseInput" value="B.Tech CSE — Semester 4" style="padding:10px;border-radius:8px;">
+      <label>Photo</label>
+      <input type="file" id="idPhotoInput" style="margin-bottom:10px;">
+      <div style="margin-top:8px;">
+        <button class="btn-secondary" onclick="updateIDPreview()">Update Preview</button>
+      </div>
+
+      <hr style="margin-top:14px;">
+      <p style="color:var(--accent);">QR code encodes: Student ID and download link (vulnerable to information disclosure).</p>
+
+    </div>
+
+  </div>
+
+</div>
+<!-- ============================= -->
+<!-- ID CARD PAGE END -->
+<!-- ============================= -->
+<!-- ============================= -->
+<!-- FEEDBACK PAGE START -->
+<!-- ============================= -->
+<div id="feedbackPage" class="page">
+
+  <h2 class="section-title">Feedback & Suggestions</h2>
+
+  <div class="grid-2">
+    
+    <!-- LEFT: Submit Feedback Form -->
+    <div class="card">
+      <h3><i class="fa fa-comment-dots"></i> Submit Your Feedback</h3>
+      <p style="color: var(--text-light); margin-bottom: 20px;">
+        We value your feedback! Please share your thoughts, suggestions, or report any issues.
+      </p>
+
+      <form id="feedbackForm" onsubmit="submitFeedback(event)">
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 500;">Student ID</label>
+          <input type="text" id="feedbackStudentId" readonly 
+                 style="width: 100%; padding: 10px; border-radius: 8px; background: #f1f5f9; border: 1px solid #e2e8f0;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 500;">Category</label>
+          <select id="feedbackCategory" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <option value="general">General Feedback</option>
+            <option value="academic">Academic</option>
+            <option value="facilities">Facilities</option>
+            <option value="technical">Technical Issue</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 500;">Your Feedback <small style="color: var(--accent);">(Vulnerable to SQL Injection)</small></label>
+          <textarea id="feedbackComment" rows="6" 
+                    placeholder="Enter your feedback here... (Try SQL injection: ' OR '1'='1)"
+                    style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-family: inherit;"
+                    required></textarea>
+          <small style="color: var(--text-light);">This form is vulnerable to SQL injection attacks for educational purposes.</small>
+        </div>
+
+        <button type="submit" class="btn" style="width: 100%;">
+          <i class="fa fa-paper-plane"></i> Submit Feedback
+        </button>
+      </form>
+
+      <div id="feedbackMessage" style="margin-top: 15px; padding: 10px; border-radius: 8px; display: none;"></div>
+    </div>
+
+    <!-- RIGHT: Recent Feedback -->
+    <div class="card">
+      <h3><i class="fa fa-list"></i> Recent Feedback</h3>
+      <p style="color: var(--text-light); margin-bottom: 20px;">
+        View feedback submitted by students (vulnerable to stored XSS).
+      </p>
+
+      <button class="btn-secondary" onclick="loadFeedback()" style="width: 100%; margin-bottom: 15px;">
+        <i class="fa fa-refresh"></i> Load Recent Feedback
+      </button>
+
+      <div id="feedbackList" style="max-height: 500px; overflow-y: auto;">
+        <p style="color: var(--text-light); text-align: center; padding: 20px;">
+          Click "Load Recent Feedback" to view submissions
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SQL Injection Testing Guide -->
+  <div class="card" style="margin-top: 20px; background: #fef3c7; border-left: 4px solid var(--accent);">
+    <h3><i class="fa fa-flask"></i> SQL Injection Testing</h3>
+    <p><strong>For Educational/Pentesting Purposes:</strong></p>
+    <p>This feedback form is intentionally vulnerable to SQL injection. Try these payloads:</p>
+    <ul style="line-height: 1.8;">
+      <li><code>' OR '1'='1</code> - Basic SQL injection</li>
+      <li><code>' UNION SELECT * FROM users--</code> - Union-based injection</li>
+      <li><code>'; DROP TABLE comments;--</code> - Destructive payload (be careful!)</li>
+      <li><code>' OR 1=1--</code> - Comment-based injection</li>
+    </ul>
+    <p style="color: #92400e;"><strong>Warning:</strong> Only use for authorized security testing!</p>
+  </div>
+
+</div>
+<!-- ============================= -->
+<!-- FEEDBACK PAGE END -->
+<!-- ============================= -->
+<!-- ============================= -->
+<!-- PART 7: ADMIN PANEL -->
+<!-- ============================= -->
+
+<div id="adminPage" class="page">
+
+  <h2 class="section-title">Admin Panel</h2>
+
+  <!-- TOP STATS -->
+  <div class="grid-4">
+    <div class="card">
+      <h4>Total Students</h4>
+      <h2 id="adminTotalStudents">30</h2>
+    </div>
+    <div class="card">
+      <h4>Active Users</h4>
+      <h2 id="adminActiveUsers">28</h2>
+    </div>
+    <div class="card">
+      <h4>Pending Fees</h4>
+      <h2 id="adminPendingFees">₹ 1,20,000</h2>
+    </div>
+    <div class="card">
+      <h4>Recent Logs</h4>
+      <h2 id="adminRecentLogs">12</h2>
+    </div>
+  </div>
+
+  <!-- ADMIN ACTIONS -->
+  <div class="card">
+    <h3>Quick Admin Actions</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn" onclick="loadAllStudents()">View All Students</button>
+      <button class="btn-accent" onclick="bulkDeleteSelected()">Bulk Delete (NO CONFIRM)</button>
+      <button class="btn-secondary" onclick="downloadAllLogs()">Download Logs</button>
+      <button class="btn" onclick="loadUsers()">Show All Users</button>
+    </div>
+    <p style="margin-top:8px;color:var(--accent);">Warning: these actions are intentionally dangerous — no CSRF, no auth checks, no confirmations.</p>
+  </div>
+
+  <!-- STUDENT MANAGEMENT TABLE -->
+  <div class="card">
+    <h3>Students (Paginated)</h3>
+    <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;">
+      <input id="adminSearch" placeholder="Search name / id / dept" style="flex:1;padding:8px;border-radius:8px;">
+      <button class="btn" onclick="adminSearch()">Search</button>
+      <select id="adminFilter" style="padding:8px;border-radius:8px;">
+        <option value="">All Departments</option>
+        <option value="CSE">CSE</option>
+        <option value="ECE">ECE</option>
+        <option value="ME">ME</option>
+      </select>
+    </div>
+
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#e2e8f0;">
+          <th style="padding:8px;border:1px solid #cbd5e1;"><input type="checkbox" id="selectAll"></th>
+          <th style="padding:8px;border:1px solid #cbd5e1;">Student ID</th>
+          <th style="padding:8px;border:1px solid #cbd5e1;">Name</th>
+          <th style="padding:8px;border:1px solid #cbd5e1;">Dept</th>
+          <th style="padding:8px;border:1px solid #cbd5e1;">Semester</th>
+          <th style="padding:8px;border:1px solid #cbd5e1;">Attendance</th>
+          <th style="padding:8px;border:1px solid #cbd5e1;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="adminStudentsTbody">
+        <!-- JavaScript will populate rows -->
+      </tbody>
+    </table>
+
+    <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <button class="btn" onclick="prevPage()">Prev</button>
+        <button class="btn" onclick="nextPage()">Next</button>
+      </div>
+      <div>
+        Page <span id="adminPageNum">1</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ADD / EDIT STUDENT -->
+  <div class="card" style="margin-top:20px;">
+    <h3>Add / Edit Student</h3>
+    <p style="color:var(--accent);">No input validation — this form allows SQLi & special characters.</p>
+
+    <div style="display:flex;gap:12px;">
+      <input id="adminStId" placeholder="Student ID (auto optional)" style="padding:8px;border-radius:8px;">
+      <input id="adminStName" placeholder="Full name" style="padding:8px;border-radius:8px;">
+      <input id="adminStDept" placeholder="Department" style="padding:8px;border-radius:8px;">
+      <input id="adminStSem" placeholder="Semester" style="padding:8px;border-radius:8px;width:80px;">
+      <button class="btn" onclick="addOrEditStudent()">Add / Update</button>
+    </div>
+    <p id="adminStMsg" style="color:var(--text-light);margin-top:8px;"></p>
+  </div>
+
+  <!-- MARKS CSV UPLOAD (Command Injection in backend processing) -->
+  <div class="card" style="margin-top:20px;">
+    <h3>Upload Marks via CSV</h3>
+    <p style="color:var(--accent);">VULNERABLE: Backend CSV processor runs a shell command on upload (command injection)</p>
+    <input type="file" id="marksCsv" accept=".csv">
+    <button class="btn-accent" onclick="uploadMarksCSV()">Upload CSV</button>
+    <p id="marksCsvMsg"></p>
+  </div>
+
+  <!-- ATTENDANCE BULK -->
+  <div class="card" style="margin-top:20px;">
+    <h3>Bulk Attendance</h3>
+    <p>Mark full class present/absent by selecting date & subject. Backdating allowed (vulnerable).</p>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input type="date" id="bulkDate" style="padding:8px;border-radius:8px;">
+      <input id="bulkSubject" placeholder="Subject code" style="padding:8px;border-radius:8px;">
+      <select id="bulkStatus" style="padding:8px;border-radius:8px;">
+        <option value="P">Present</option>
+        <option value="A">Absent</option>
+        <option value="L">Late</option>
+      </select>
+      <button class="btn" onclick="bulkAttendance()">Apply</button>
+    </div>
+  </div>
+
+  <!-- LOGS VIEWER -->
+  <div class="card" style="margin-top:20px;">
+    <h3>System Logs (No Auth)</h3>
+    <p style="color:var(--accent);">Endpoint: <b>/api/admin/logs</b> — Exposes request data & sensitive info</p>
+    <button class="btn" onclick="loadLogs()">Load Logs</button>
+    <pre id="logsPre" style="height:220px;overflow:auto;margin-top:10px;background:#0b1220;color:#9be7ff;padding:10px;border-radius:8px;"></pre>
+    <div style="margin-top:8px;">
+      <button class="btn" onclick="downloadLogs()">Download Logs (No Auth)</button>
+    </div>
+  </div>
+
+  <!-- USER LIST (exposes usernames & passwords) -->
+  <div class="card" style="margin-top:20px;">
+    <h3>All Users (Exposed)</h3>
+    <p style="color:var(--accent);">Endpoint: <b>/api/admin/users</b> returns usernames & plaintext passwords</p>
+    <button class="btn" onclick="loadUsers()">Load Users</button>
+    <pre id="usersPre" style="height:140px;overflow:auto;margin-top:10px;"></pre>
+  </div>
+
+</div>
+
+<!-- ============================= -->
+<!-- PART 7 END -->
+<!-- ============================= -->
+<script>
+/* ============================================================
+      PAGE NAVIGATION
+============================================================ */
+function goToPage(pageId) {
+  if (!currentUser && pageId !== 'loginPage') {
+    alert('Please login first');
+    return;
+  }
+  
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(p => {
+    p.classList.remove('active-page');
+  });
+  
+  // Show the requested page
+  const page = document.getElementById(pageId);
+  if (page) {
+    page.classList.add('active-page');
+    
+    // Update active nav link
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('data-page') === pageId) {
+        link.classList.add('active');
+      }
+    });
+    
+    // Reload data when navigating to specific pages
+    if (currentStudent) {
+      const studentId = currentStudent.id;
+      console.log('Navigating to:', pageId, 'for student:', studentId);
+      
+      if (pageId === 'attendancePage') {
+        loadAttendanceData(studentId);
+      } else if (pageId === 'marksPage') {
+        loadMarksData(studentId);
+      } else if (pageId === 'feesPage') {
+        loadFeesData(studentId);
+      } else if (pageId === 'libraryPage') {
+        loadLibraryData(studentId);
+      } else if (pageId === 'profilePage') {
+        updateProfilePage();
+      } else if (pageId === 'feedbackPage') {
+        initFeedbackPage();
+      } else if (pageId === 'dashboardPage') {
+        updateDashboard();
+        loadStudentData(); // Refresh all data
+      }
+    }
+  } else {
+    console.error('Page not found:', pageId);
+  }
+}
+
+// Store current user data
+let currentUser = null;
+let currentStudent = null;
+
+/* API URL Configuration - Localhost Only */
+// Use config.js if available, otherwise default to localhost
+let API = (window.API_CONFIG && window.API_CONFIG.baseUrl) 
+  ? window.API_CONFIG.baseUrl 
+  : 'http://localhost:3000/api';
+
+// Log API URL for debugging
+console.log('API URL:', API);
+console.log('Running on localhost');
+
+/* ============================================================
+      LOGIN HANDLING
+============================================================ */
+function handleLogin(event) {
+  event.preventDefault();
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errorDiv = document.getElementById('loginError');
+
+  // Clear previous errors
+  errorDiv.style.display = 'none';
+  errorDiv.textContent = '';
+  
+  // Validate input
+  if (!username || !password) {
+    errorDiv.textContent = 'Please enter both Student ID and Password';
+    errorDiv.style.display = 'block';
+    return;
+  }
+  
+  console.log('Attempting login for:', username);
+  console.log('API endpoint:', `${API}/login`);
+  
+  // Disable login button to prevent double submission
+  const loginBtn = document.querySelector('.login-form button[type="submit"]');
+  const originalBtnText = loginBtn ? loginBtn.innerHTML : '';
+  const originalBtnDisabled = loginBtn ? loginBtn.disabled : false;
+  
+  if (loginBtn) {
+    loginBtn.disabled = true;
+    loginBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Logging in...';
+  }
+  
+  fetch(`${API}/login`, {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ username, password })
+  })
+  .then(res => {
+    console.log('Response status:', res.status);
+    console.log('Response headers:', res.headers);
+    if (!res.ok) {
+      // Try to get error message from response
+      return res.json().then(errData => {
+        console.error('Error response:', errData);
+        throw new Error(errData.error || `HTTP error! status: ${res.status}`);
+      }).catch(() => {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      });
+    }
+    return res.json();
+  })
+  .then(data => {
+    console.log('✅ Login response received:', data);
+    console.log('Token:', data.token ? 'Present' : 'Missing');
+    console.log('Student info:', data.student_info ? 'Present' : 'Missing');
+    
+    // Re-enable login button
+    const loginBtn = document.querySelector('.login-form button[type="submit"]');
+    if (loginBtn) {
+      loginBtn.disabled = false;
+      loginBtn.innerHTML = '<i class="fa fa-sign-in-alt"></i> Login';
+    }
+    
+    if (data.error) {
+      errorDiv.textContent = data.error;
+      errorDiv.style.display = 'block';
+    } else if (data.token) {
+      currentUser = data;
+      currentStudent = data.student_info;
+      
+      // Store token and user info
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data));
+      
+      // Show success message
+      showLoginSuccess(currentStudent ? currentStudent.name : 'Student');
+      
+      // Hide login page, show main content
+      setTimeout(() => {
+        const loginPage = document.getElementById('loginPage');
+        const navbar = document.getElementById('mainNavbar');
+        const sidebar = document.getElementById('sidebarNav');
+        const mainContent = document.getElementById('mainContent');
+        
+        // Hide login page
+        loginPage.classList.remove('active-page');
+        loginPage.classList.add('hidden');
+        loginPage.style.display = 'none';
+        document.body.classList.remove('login-active');
+        
+        // Show main content
+        navbar.classList.remove('hidden');
+        navbar.style.display = 'flex';
+        sidebar.classList.remove('hidden');
+        sidebar.style.display = 'block';
+        mainContent.classList.remove('hidden');
+        mainContent.style.display = 'block';
+        
+        // Update navbar with student name immediately
+        if (currentStudent) {
+          document.getElementById('navStudentName').textContent = currentStudent.name;
+        }
+        
+        // Show dashboard
+        goToPage('dashboardPage');
+        
+        // Load student-specific data immediately
+        loadStudentData();
+        
+        // Set dashboard as active in sidebar
+        setTimeout(() => {
+          document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('data-page') === 'dashboardPage') {
+              link.classList.add('active');
+            }
+          });
+        }, 100);
+      }, 1500); // Wait 1.5 seconds to show success message
+    } else {
+      errorDiv.textContent = 'Unexpected response from server';
+      errorDiv.style.display = 'block';
+    }
+  })
+  .catch(err => {
+    console.error('Login error:', err);
+    
+    // Re-enable login button
+    const loginBtn = document.querySelector('.login-form button[type="submit"]');
+    if (loginBtn) {
+      loginBtn.disabled = false;
+      loginBtn.innerHTML = '<i class="fa fa-sign-in-alt"></i> Login';
+    }
+    
+    let errorMsg = 'Connection error. ';
+    if (err.name === 'AbortError' || err.message.includes('aborted')) {
+      errorMsg = 'Request was cancelled. This might be a browser issue. Please try again or use a different browser.';
+    } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+      errorMsg = 'Cannot connect to backend server. Make sure it\'s running on port 3000.';
+    } else {
+      errorMsg += err.message;
+    }
+    
+    errorDiv.textContent = errorMsg + ' Check browser console (F12) for details.';
+    errorDiv.style.display = 'block';
+  });
+}
+
+function showLoginSuccess(studentName) {
+  const successDiv = document.getElementById('loginSuccess');
+  const nameSpan = document.getElementById('successStudentName');
+  if (nameSpan) {
+    nameSpan.textContent = `Welcome, ${studentName}!`;
+  }
+  successDiv.classList.remove('hidden');
+  
+  // Hide after 1.5 seconds
+  setTimeout(() => {
+    successDiv.classList.add('hidden');
+  }, 1500);
+}
+
+function handleLogout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  currentUser = null;
+  currentStudent = null;
+  
+  // Hide main content, show login
+  const mainContent = document.getElementById('mainContent');
+  const navbar = document.getElementById('mainNavbar');
+  const sidebar = document.getElementById('sidebarNav');
+  const loginPage = document.getElementById('loginPage');
+  
+  mainContent.classList.add('hidden');
+  mainContent.style.display = 'none';
+  navbar.classList.add('hidden');
+  navbar.style.display = 'none';
+  sidebar.classList.add('hidden');
+  sidebar.style.display = 'none';
+  
+  loginPage.classList.remove('hidden');
+  loginPage.classList.add('active-page');
+  loginPage.style.display = 'flex';
+  document.body.classList.add('login-active');
+  
+  // Clear form
+  document.getElementById('loginUsername').value = '';
+  document.getElementById('loginPassword').value = '';
+}
+
+// Check if user is already logged in
+function checkAuth() {
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  
+  if (token && userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      currentUser = user;
+      currentStudent = user.student_info;
+      
+      // Show main content
+      const loginPage = document.getElementById('loginPage');
+      const navbar = document.getElementById('mainNavbar');
+      const sidebar = document.getElementById('sidebarNav');
+      const mainContent = document.getElementById('mainContent');
+      
+      loginPage.classList.remove('active-page');
+      loginPage.classList.add('hidden');
+      loginPage.style.display = 'none';
+      document.body.classList.remove('login-active');
+      
+      navbar.classList.remove('hidden');
+      navbar.style.display = 'flex';
+      sidebar.classList.remove('hidden');
+      sidebar.style.display = 'block';
+      mainContent.classList.remove('hidden');
+      mainContent.style.display = 'block';
+      
+      setTimeout(() => {
+        goToPage('dashboardPage');
+      }, 100);
+      
+      if (currentStudent) {
+        document.getElementById('navStudentName').textContent = currentStudent.name;
+      }
+      
+      loadStudentData();
+      
+      // Set dashboard as active in sidebar
+      setTimeout(() => {
+        document.querySelectorAll('.nav-link').forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('data-page') === 'dashboardPage') {
+            link.classList.add('active');
+          }
+        });
+      }, 100);
+    } catch (e) {
+      handleLogout();
+    }
+  }
+}
+
+// Load student-specific data
+function loadStudentData() {
+  if (!currentStudent) {
+    console.error('Cannot load student data: currentStudent is null');
+    return;
+  }
+  
+  const studentId = currentStudent.id;
+  console.log('Loading all data for student:', studentId);
+  
+  // Update dashboard first with basic info
+  updateDashboard();
+  
+  // Load all data in parallel
+  Promise.all([
+    loadAttendanceData(studentId).catch(err => console.error('Attendance load error:', err)),
+    loadMarksData(studentId).catch(err => console.error('Marks load error:', err)),
+    loadFeesData(studentId).catch(err => console.error('Fees load error:', err)),
+    loadLibraryData(studentId).catch(err => console.error('Library load error:', err))
+  ]).then(() => {
+    console.log('All student data loaded successfully');
+  }).catch(err => {
+    console.error('Error loading some student data:', err);
+  });
+}
+
+function updateProfilePage() {
+  if (!currentStudent) return;
+  
+  document.getElementById('studentName').textContent = currentStudent.name;
+  document.getElementById('studentRoll').textContent = `Roll No: ${currentStudent.id}`;
+  
+  // Update ID card fields
+  if (document.getElementById('idName')) {
+    document.getElementById('idName').textContent = currentStudent.name;
+  }
+  if (document.getElementById('idNumber')) {
+    document.getElementById('idNumber').textContent = currentStudent.id;
+  }
+  if (document.getElementById('idCourse')) {
+    document.getElementById('idCourse').textContent = `B.Tech ${currentStudent.dept} — Semester ${currentStudent.semester}`;
+  }
+  
+  // Update profile details if elements exist
+  const deptEl = document.querySelector('[data-field="dept"]');
+  if (deptEl) deptEl.textContent = currentStudent.dept;
+  
+  const semEl = document.querySelector('[data-field="semester"]');
+  if (semEl) semEl.textContent = currentStudent.semester;
+  
+  const batchEl = document.querySelector('[data-field="batch"]');
+  if (batchEl) batchEl.textContent = `${currentStudent.batch}-${currentStudent.batch + 4}`;
+  
+  const emailEl = document.querySelector('[data-field="email"]');
+  if (emailEl) emailEl.textContent = currentStudent.email;
+  
+  const phoneEl = document.querySelector('[data-field="phone"]');
+  if (phoneEl) phoneEl.textContent = currentStudent.phone;
+  
+  const cityEl = document.querySelector('[data-field="city"]');
+  if (cityEl) cityEl.textContent = currentStudent.city;
+}
+
+function updateDashboard() {
+  if (!currentStudent) {
+    console.warn('No current student data available for dashboard');
+    return;
+  }
+  
+  console.log('Updating dashboard for:', currentStudent.name);
+  
+  // Update CGPA
+  if (currentStudent.cgpa !== undefined && currentStudent.cgpa !== null) {
+    const cgpaEl = document.getElementById('dashCGPA');
+    if (cgpaEl) {
+      cgpaEl.textContent = parseFloat(currentStudent.cgpa).toFixed(2);
+    }
+    const marksCgpaEl = document.getElementById('marksCGPA');
+    if (marksCgpaEl) {
+      marksCgpaEl.textContent = parseFloat(currentStudent.cgpa).toFixed(2);
+    }
+  }
+  
+  // Update student name in welcome message if exists
+  const welcomeEl = document.getElementById('welcomeStudent');
+  if (welcomeEl) {
+    welcomeEl.textContent = currentStudent.name || 'Student';
+  }
+  
+  // Update student ID if exists
+  const studentIdEl = document.getElementById('dashStudentId');
+  if (studentIdEl) {
+    studentIdEl.textContent = currentStudent.id || '-';
+  }
+  
+  // Update department if exists
+  const deptEl = document.getElementById('dashDept');
+  if (deptEl) {
+    deptEl.textContent = currentStudent.dept || '-';
+  }
+  
+  // Update semester if exists
+  const semEl = document.getElementById('dashSemester');
+  if (semEl) {
+    semEl.textContent = currentStudent.semester ? `Semester ${currentStudent.semester}` : '-';
+  }
+  
+  // Update profile page fields
+  updateProfilePage();
+}
+
+function loadAttendanceData(studentId) {
+  if (!studentId) {
+    console.error('No student ID provided for attendance');
+    return Promise.reject('No student ID');
+  }
+  
+  // Update student name on attendance page
+  if (currentStudent) {
+    const nameEl = document.getElementById('attendanceStudentName');
+    if (nameEl) {
+      nameEl.textContent = currentStudent.name + ' (' + currentStudent.id + ')';
+    }
+  }
+  
+  console.log('Loading attendance for:', studentId);
+  const tbody = document.getElementById('attendanceTable');
+  if (tbody) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;"><i class="fa fa-spinner fa-spin"></i> Loading...</td></tr>';
+  }
+  
+  return fetch(`${API}/student/attendance/${studentId}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      console.log('Attendance data received:', data);
+      if (!tbody) {
+        console.error('Attendance table body not found');
+        return;
+      }
+      
+      if (Array.isArray(data) && data.length > 0) {
+        tbody.innerHTML = data.map(att => {
+          const statusColor = att.status === 'P' ? '#10b981' : att.status === 'A' ? '#ef4444' : '#f59e0b';
+          const statusText = att.status === 'P' ? 'Present' : att.status === 'A' ? 'Absent' : att.status || 'Unknown';
+          const subjectName = att.subject_name || att.subject_id || 'N/A';
+          const dateFormatted = att.date ? new Date(att.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A';
+          return `
+          <tr style="transition: all 0.2s ease; cursor: pointer;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+            <td style="padding:12px;border:1px solid #cbd5e1;font-weight:500;">${dateFormatted}</td>
+            <td style="padding:12px;border:1px solid #cbd5e1;font-weight:500;">${subjectName}</td>
+            <td style="padding:12px;border:1px solid #cbd5e1;">
+              <span style="color: ${statusColor}; font-weight: bold; padding: 4px 12px; border-radius: 20px; background: ${statusColor}20; display: inline-block;">
+                ${statusText}
+              </span>
+            </td>
+          </tr>
+        `;
+        }).join('');
+        
+        // Calculate attendance percentage
+        const present = data.filter(a => a.status === 'P').length;
+        const total = data.length;
+        const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
+        
+        const percentEl = document.getElementById('attendancePercent');
+        if (percentEl) {
+          percentEl.textContent = `${percentage}%`;
+          percentEl.style.color = percentage >= 75 ? '#10b981' : percentage >= 60 ? '#f59e0b' : '#ef4444';
+        }
+        
+        const dashAttEl = document.getElementById('dashAttendance');
+        if (dashAttEl) {
+          dashAttEl.textContent = `${percentage}%`;
+        }
+        
+        // Calculate attendance by subject
+        const subjectStats = {};
+        data.forEach(att => {
+          const subjName = att.subject_name || att.subject_id || 'Unknown';
+          if (!subjectStats[subjName]) {
+            subjectStats[subjName] = { present: 0, total: 0 };
+          }
+          subjectStats[subjName].total++;
+          if (att.status === 'P') {
+            subjectStats[subjName].present++;
+          }
+        });
+        
+        // Update subject list
+        const subjectsList = document.getElementById('attendanceSubjects');
+        if (subjectsList) {
+          subjectsList.innerHTML = Object.keys(subjectStats).map(subj => {
+            const stats = subjectStats[subj];
+            const subjPercent = stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 0;
+            const color = subjPercent >= 75 ? '#10b981' : subjPercent >= 60 ? '#f59e0b' : '#ef4444';
+            return `<li style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+              <span>${subj}</span>
+              <b style="color: ${color}; font-size: 16px;">${subjPercent}%</b>
+            </li>`;
+          }).join('');
+        }
+        
+        // Update attendance chart if it exists
+        updateAttendanceChart(data, subjectStats);
+      } else {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-light);">No attendance records found</td></tr>';
+      }
+    })
+    .catch(err => {
+      console.error('Error loading attendance:', err);
+      if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;color:#ef4444;">Error loading attendance data: ' + err.message + '</td></tr>';
+      }
+      throw err; // Re-throw for Promise.all handling
+    });
+}
+
+function loadMarksData(studentId) {
+  if (!studentId) {
+    console.error('No student ID provided for marks');
+    return Promise.reject('No student ID');
+  }
+  
+  // Update student name on marks page
+  if (currentStudent) {
+    const nameEl = document.getElementById('marksStudentName');
+    if (nameEl) {
+      nameEl.textContent = currentStudent.name + ' (' + currentStudent.id + ')';
+    }
+  }
+  
+  console.log('Loading marks for:', studentId);
+  const tbody = document.getElementById('marksTable');
+  if (tbody) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;"><i class="fa fa-spinner fa-spin"></i> Loading...</td></tr>';
+  }
+  
+  return fetch(`${API}/student/marks/${studentId}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      console.log('Marks data received:', data);
+      if (!tbody) {
+        console.error('Marks table body not found');
+        return;
+      }
+      
+      if (Array.isArray(data) && data.length > 0) {
+        tbody.innerHTML = data.map(mark => {
+          const percentage = mark.max_marks > 0 ? Math.round((mark.marks / mark.max_marks) * 100) : 0;
+          const gradeColor = mark.grade === 'A' ? '#10b981' : mark.grade === 'B' ? '#3b82f6' : mark.grade === 'C' ? '#f59e0b' : '#ef4444';
+          return `
+          <tr>
+            <td style="padding:10px;border:1px solid #cbd5e1;font-weight:500;">${mark.subject_name || mark.subject_id || 'N/A'}</td>
+            <td style="padding:10px;border:1px solid #cbd5e1;">${mark.marks || 0}/${mark.max_marks || 100} (${percentage}%)</td>
+            <td style="padding:10px;border:1px solid #cbd5e1;">
+              <span style="color: ${gradeColor}; font-weight: bold; font-size: 18px;">${mark.grade || 'N/A'}</span>
+            </td>
+          </tr>
+        `;
+        }).join('');
+        
+        // Update CGPA on marks page if available
+        if (currentStudent && currentStudent.cgpa) {
+          const cgpaEl = document.getElementById('marksCGPA');
+          if (cgpaEl) {
+            cgpaEl.textContent = currentStudent.cgpa;
+          }
+        }
+      } else {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-light);">No marks records found</td></tr>';
+      }
+    })
+    .catch(err => {
+      console.error('Error loading marks:', err);
+      if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;color:#ef4444;">Error loading marks data: ' + err.message + '</td></tr>';
+      }
+      throw err; // Re-throw for Promise.all handling
+    });
+}
+
+function loadFeesData(studentId) {
+  if (!studentId) {
+    console.error('No student ID provided for fees');
+    return Promise.reject('No student ID');
+  }
+  
+  console.log('Loading fees for:', studentId);
+  const tbody = document.getElementById('feeHistory');
+  if (tbody) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;"><i class="fa fa-spinner fa-spin"></i> Loading...</td></tr>';
+  }
+  
+  return fetch(`${API}/student/fees/${studentId}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      console.log('Fees data received:', data);
+      if (!tbody) {
+        console.error('Fees table body not found');
+        return;
+      }
+      
+      if (Array.isArray(data) && data.length > 0) {
+        tbody.innerHTML = data.map(fee => `
+          <tr>
+            <td style="padding:10px;border:1px solid #cbd5e1;">${fee.payment_date || fee.due_date || 'N/A'}</td>
+            <td style="padding:10px;border:1px solid #cbd5e1;font-weight:500;">₹ ${(fee.paid_amount || fee.amount || 0).toLocaleString()}</td>
+            <td style="padding:10px;border:1px solid #cbd5e1;color:${fee.status === 'Paid' ? '#10b981' : fee.status === 'Partial' ? '#f59e0b' : '#ef4444'};">
+              <b>${fee.status || 'Pending'}</b>
+            </td>
+          </tr>
+        `).join('');
+        
+        // Calculate total pending fees across all records
+        let totalAmount = 0;
+        let totalPaid = 0;
+        data.forEach(fee => {
+          totalAmount += fee.amount || 0;
+          totalPaid += fee.paid_amount || 0;
+        });
+        const pending = totalAmount - totalPaid;
+        
+        const feePendingEl = document.getElementById('feePending');
+        if (feePendingEl) {
+          feePendingEl.textContent = `₹ ${pending.toLocaleString()}`;
+        }
+        
+        const dashPendingFeesEl = document.getElementById('dashPendingFees');
+        if (dashPendingFeesEl) {
+          dashPendingFeesEl.textContent = `₹ ${pending.toLocaleString()}`;
+        }
+      } else {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-light);">No fee records found</td></tr>';
+        // Set pending fees to 0 if no data
+        const dashPendingFeesEl = document.getElementById('dashPendingFees');
+        if (dashPendingFeesEl) {
+          dashPendingFeesEl.textContent = '₹ 0';
+        }
+      }
+    })
+    .catch(err => {
+      console.error('Error loading fees:', err);
+      if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;color:#ef4444;">Error loading fees data: ' + err.message + '</td></tr>';
+      }
+      throw err; // Re-throw for Promise.all handling
+    });
+}
+
+function loadLibraryData(studentId) {
+  if (!studentId) {
+    console.error('No student ID provided for library');
+    return Promise.reject('No student ID');
+  }
+  
+  console.log('Loading library data for:', studentId);
+  const tbody = document.getElementById('issuedBooksTable');
+  if (tbody) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;"><i class="fa fa-spinner fa-spin"></i> Loading...</td></tr>';
+  }
+  
+  return fetch(`${API}/library/books?student_id=${studentId}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      console.log('Library data received:', data);
+      if (!tbody) {
+        console.error('Library table body not found');
+        return;
+      }
+      
+      if (Array.isArray(data) && data.length > 0) {
+        tbody.innerHTML = data.map(book => `
+          <tr>
+            <td style="padding:8px;border:1px solid #cbd5e1;font-weight:500;">${book.title || 'N/A'}</td>
+            <td style="padding:8px;border:1px solid #cbd5e1;">${book.issue_date || 'N/A'}</td>
+            <td style="padding:8px;border:1px solid #cbd5e1;">${book.due_date || 'N/A'}</td>
+            <td style="padding:8px;border:1px solid #cbd5e1;color:${book.fine > 0 ? '#ef4444' : '#10b981'};font-weight:bold;">₹ ${book.fine || 0}</td>
+            <td style="padding:8px;border:1px solid #cbd5e1;">
+              <button class="btn" onclick="returnBook('${book.book_id || ''}')">Return</button>
+            </td>
+          </tr>
+        `).join('');
+        
+        // Update dashboard books count
+        const dashBooksEl = document.getElementById('dashBooks');
+        if (dashBooksEl) {
+          dashBooksEl.textContent = data.length;
+        }
+      } else {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-light);">No books issued</td></tr>';
+        const dashBooksEl = document.getElementById('dashBooks');
+        if (dashBooksEl) {
+          dashBooksEl.textContent = '0';
+        }
+      }
+    })
+    .catch(err => {
+      console.error('Error loading library:', err);
+      if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:#ef4444;">Error loading library data: ' + err.message + '</td></tr>';
+      }
+      throw err; // Re-throw for Promise.all handling
+    });
+}
+
+/* ============================================================
+      DASHBOARD CHARTS
+============================================================ */
+// Test backend connection on page load
+function checkBackendConnection() {
+  // Try to ping the backend (using a simple endpoint)
+  fetch(`${API}/students`, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json'
+    }
+  })
+    .then(res => {
+      if (res.ok) {
+        console.log('✅ Backend connection successful');
+        // Hide any connection error if it was showing
+        const errorDiv = document.getElementById('loginError');
+        if (errorDiv && errorDiv.textContent.includes('Connection error')) {
+          errorDiv.style.display = 'none';
+        }
+        return res.json();
+      } else {
+        throw new Error(`Backend responded with status: ${res.status}`);
+      }
+    })
+    .then(data => {
+      console.log('Backend is ready. Students available:', data ? data.length : 0);
+    })
+    .catch(err => {
+      // Only log if it's not an abort error (which Firefox sometimes shows)
+      if (!err.message.includes('aborted') && err.name !== 'AbortError' && !err.message.includes('OpaqueResponse')) {
+        console.warn('⚠️ Backend not accessible. Make sure server is running on port 3000');
+        console.warn('Error:', err.message);
+      }
+      // Don't show error immediately, only show when user tries to login
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Set login-active class on body initially
+  document.body.classList.add('login-active');
+  
+  checkBackendConnection(); // Test if backend is accessible
+  checkAuth(); // Check if user is already logged in
+  initAttendanceChart();
+  initTopSubjectsChart();
+});
+
+/* Attendance Trend */
+let attendanceBarChartInstance = null;
+
+function initAttendanceChart() {
+  const ctx = document.getElementById("attendanceChart");
+  if (ctx) {
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: ["June","July","Aug","Sep","Oct","Nov"],
+        datasets: [{
+          label: "Attendance %",
+          data: [92, 90, 95, 93, 88, 92],
+          borderWidth: 3,
+          tension: 0.3,
+          borderColor: '#4F46E5',
+          backgroundColor: 'rgba(79, 70, 229, 0.1)'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true
+      }
+    });
+  }
+  
+  // Initialize attendance bar chart
+  const barCtx = document.getElementById("attendanceBarChart");
+  if (barCtx && !attendanceBarChartInstance) {
+    attendanceBarChartInstance = new Chart(barCtx, {
+      type: "bar",
+      data: {
+        labels: [],
+        datasets: [{
+          label: "Attendance %",
+          data: [],
+          backgroundColor: '#4F46E5',
+          borderColor: '#4F46E5',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100
+          }
+        }
+      }
+    });
+  }
+}
+
+function updateAttendanceChart(data, subjectStats) {
+  const barCtx = document.getElementById("attendanceBarChart");
+  if (!barCtx || !attendanceBarChartInstance) {
+    // Initialize if not exists
+    if (barCtx) {
+      attendanceBarChartInstance = new Chart(barCtx, {
+        type: "bar",
+        data: {
+          labels: [],
+          datasets: [{
+            label: "Attendance %",
+            data: [],
+            backgroundColor: '#4F46E5',
+            borderColor: '#4F46E5',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100
+            }
+          }
+        }
+      });
+    } else {
+      return;
+    }
+  }
+  
+  if (subjectStats && Object.keys(subjectStats).length > 0) {
+    const labels = Object.keys(subjectStats);
+    const percentages = labels.map(subj => {
+      const stats = subjectStats[subj];
+      return stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 0;
+    });
+    const colors = percentages.map(p => p >= 75 ? '#10b981' : p >= 60 ? '#f59e0b' : '#ef4444');
+    
+    attendanceBarChartInstance.data.labels = labels;
+    attendanceBarChartInstance.data.datasets[0].data = percentages;
+    attendanceBarChartInstance.data.datasets[0].backgroundColor = colors;
+    attendanceBarChartInstance.data.datasets[0].borderColor = colors;
+    attendanceBarChartInstance.update();
+  }
+}
+
+/* Top Subjects */
+function initTopSubjectsChart() {
+  const ctx = document.getElementById("subjectsChart");
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["DS","DBMS","OS","Maths","WebTech"],
+      datasets: [{
+        label: "Score",
+        data: [87,91,86,88,90],
+        borderWidth: 2
+      }]
+    }
+  });
+}
+
+/* ============================================================
+      PROFILE PAGE FUNCTIONS
+============================================================ */
+
+/* Upload profile photo (UNRESTRICTED - VULNERABLE) */
+function uploadProfilePhoto() {
+  const file = document.getElementById('photoInput').files[0];
+  if (!file) return alert("Select a file first");
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('profilePhoto').src = e.target.result;
+    alert("Photo updated (client-side only)");
+  };
+  reader.readAsDataURL(file);
+}
+
+/* Save BIO (Stored XSS vulnerability) */
+function saveBio() {
+  const bio = document.getElementById("bioInput").value;
+  localStorage.setItem("studentBio", bio);
+  alert("Bio saved (XSS stored)");
+}
+
+/* Social links */
+function saveSocial() {
+  alert("Links saved (not validated)");
+}
+
+/* ============================================================
+      FEES PAYMENT FUNCTIONS (VULNERABLE)
+============================================================ */
+function processPayment() {
+  const name = document.getElementById("payName").value;
+  const card = document.getElementById("payCard").value;
+  const cvv = document.getElementById("payCVV").value;
+
+  alert("Payment sent with card details:\n" + card + "\n(NOT SECURE)");
+}
+
+/* ============================================================
+      LIBRARY FUNCTIONS (SQLi, IDOR)
+============================================================ */
+
+/* Search library catalog (SQL injection possible) */
+function searchLibrary() {
+  const q = document.getElementById("libSearchInput").value;
+  fetch(`${API}/search?query=${q}`)
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById("libSearchResults").innerHTML = html;
+    });
+}
+
+/* Reserve book (NO AUTH) */
+function reserveBook() {
+  const id = document.getElementById("reserveBookId").value;
+  document.getElementById("reserveResult").innerHTML =
+    `<span style='color:green;'>Book ${id} reserved (fake)</span>`;
+}
+
+function returnBook(title) {
+  alert("Returned: " + title + " (not real)");
+}
+
+/* ============================================================
+      TIMETABLE PDF EXPORT (Fake)
+============================================================ */
+function downloadTimetablePDF() {
+  alert("Timetable PDF downloaded (fake placeholder)");
+}
+
+/* ============================================================
+      ID CARD GENERATOR + QR CODE
+============================================================ */
+
+function updateIDPreview() {
+  document.getElementById('idName').innerText = document.getElementById('idNameInput').value;
+  document.getElementById('idNumber').innerText = document.getElementById('idNumberInput').value;
+  document.getElementById('idCourse').innerText = document.getElementById('idCourseInput').value;
+
+  const file = document.getElementById("idPhotoInput").files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.getElementById("idPhotoSmall").src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+/* Download ID card as image */
+function downloadIDCard() {
+  html2canvas(document.getElementById("idCardPreview")).then(canvas => {
+    const link = document.createElement("a");
+    link.download = "IDCard.png";
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+}
+
+/* Load HTML2Canvas Library */
+let html2canvasScript = document.createElement("script");
+html2canvasScript.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+document.body.appendChild(html2canvasScript);
+
+/* ============================================================
+      ATTENDANCE TABLE RENDERING (Sample)
+      Note: Now loaded dynamically via loadAttendanceData()
+============================================================ */
+
+/* ============================================================
+      MARKS CHART & TABLE
+============================================================ */
+function initMarksPage() {
+  const ctx = document.getElementById("marksChart");
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["DS","DBMS","OS","Maths","WebTech"],
+      datasets: [{
+        label: "Marks",
+        data: [87,91,86,93,89],
+        borderWidth: 2
+      }]
+    }
+  });
+}
+initMarksPage();
+
+/* ============================================================
+      ADMIN PANEL FUNCTIONS
+============================================================ */
+
+let adminPageNum = 1;
+
+/* Fake student list for admin table */
+let studentList = [
+  { id:"STU001", name:"Rahul Sharma", dept:"CSE", sem:4, att:"92%" },
+  { id:"STU002", name:"Priya Patel", dept:"ECE", sem:3, att:"86%" },
+  { id:"STU003", name:"Arjun Reddy", dept:"CSE", sem:5, att:"88%" },
+  { id:"STU004", name:"Sneha Gupta", dept:"IT", sem:2, att:"94%" },
+];
+
+function loadAllStudents() {
+  const tbody = document.getElementById("adminStudentsTbody");
+  tbody.innerHTML = "";
+
+  studentList.forEach(st => {
+    tbody.innerHTML += `
+      <tr>
+        <td><input type='checkbox' class='stChk'></td>
+        <td>${st.id}</td>
+        <td>${st.name}</td>
+        <td>${st.dept}</td>
+        <td>${st.sem}</td>
+        <td>${st.att}</td>
+        <td>
+          <button class='btn' onclick="loadStudentForEdit('${st.id}')">Edit</button>
+          <button class='btn-accent' onclick="deleteStudent('${st.id}')">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+/* Bulk delete */
+function bulkDeleteSelected() {
+  alert("Bulk delete executed (NO CONFIRMATION)");
+}
+
+/* Edit student */
+function loadStudentForEdit(id) {
+  const st = studentList.find(s => s.id === id);
+  document.getElementById("adminStId").value = st.id;
+  document.getElementById("adminStName").value = st.name;
+  document.getElementById("adminStDept").value = st.dept;
+  document.getElementById("adminStSem").value = st.sem;
+}
+
+/* Add or edit student */
+function addOrEditStudent() {
+  alert("Student added/updated (unsafe endpoint)");
+}
+
+/* Delete student */
+function deleteStudent(id) {
+  alert(`Student ${id} deleted (No validation)`);
+}
+
+/* MARKS CSV UPLOAD (Command Injection) */
+function uploadMarksCSV() {
+  alert("CSV uploaded — backend command injection triggered (fake)");
+}
+
+/* BULK ATTENDANCE */
+function bulkAttendance() {
+  alert("Bulk attendance applied (backdating allowed)");
+}
+
+/* LOGS VIEWER */
+function loadLogs() {
+  fetch(`${API}/admin/logs`)
+    .then(res => res.text())
+    .then(txt => document.getElementById("logsPre").innerText = txt);
+}
+function downloadLogs() {
+  window.location = `${API}/admin/logs`;
+}
+
+/* USERS EXPOSURE */
+function loadUsers() {
+  fetch(`${API}/admin/users`)
+    .then(res => res.text())
+    .then(txt => document.getElementById("usersPre").innerText = txt);
+}
+
+/* Pagination Buttons */
+function nextPage(){ adminPageNum++; document.getElementById("adminPageNum").innerText = adminPageNum; }
+function prevPage(){ if(adminPageNum>1){ adminPageNum--; document.getElementById("adminPageNum").innerText = adminPageNum; } }
+
+/* ============================================================
+      FEEDBACK PAGE FUNCTIONS
+============================================================ */
+function submitFeedback(event) {
+  event.preventDefault();
+  
+  const studentId = currentStudent ? currentStudent.id : document.getElementById('feedbackStudentId').value;
+  const category = document.getElementById('feedbackCategory').value;
+  const comment = document.getElementById('feedbackComment').value;
+  const messageDiv = document.getElementById('feedbackMessage');
+  
+  if (!comment.trim()) {
+    messageDiv.textContent = 'Please enter your feedback';
+    messageDiv.style.display = 'block';
+    messageDiv.style.background = '#fee2e2';
+    messageDiv.style.color = '#991b1b';
+    return;
+  }
+  
+  // Update student ID field
+  if (currentStudent) {
+    document.getElementById('feedbackStudentId').value = currentStudent.id;
+  }
+  
+  fetch(`${API}/feedback`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      student_id: studentId,
+      category: category,
+      comment: comment 
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    messageDiv.textContent = '✅ Feedback submitted successfully!';
+    messageDiv.style.display = 'block';
+    messageDiv.style.background = '#d1fae5';
+    messageDiv.style.color = '#065f46';
+    
+    // Clear form
+    document.getElementById('feedbackComment').value = '';
+    
+    // Reload feedback list
+    setTimeout(() => loadFeedback(), 1000);
+  })
+  .catch(err => {
+    console.error('Feedback error:', err);
+    messageDiv.textContent = '❌ Error submitting feedback: ' + err.message;
+    messageDiv.style.display = 'block';
+    messageDiv.style.background = '#fee2e2';
+    messageDiv.style.color = '#991b1b';
+  });
+}
+
+function loadFeedback() {
+  const feedbackList = document.getElementById('feedbackList');
+  feedbackList.innerHTML = '<p style="text-align: center; padding: 20px;">Loading...</p>';
+  
+  fetch(`${API}/feedback`)
+    .then(res => res.text())
+    .then(html => {
+      feedbackList.innerHTML = html;
+    })
+    .catch(err => {
+      console.error('Error loading feedback:', err);
+      feedbackList.innerHTML = '<p style="color: #ef4444;">Error loading feedback</p>';
+    });
+}
+
+// Initialize feedback page
+function initFeedbackPage() {
+  if (currentStudent) {
+    document.getElementById('feedbackStudentId').value = currentStudent.id;
+  }
+}
+
+</script>
+
+</div> <!-- End mainContent -->
+
+</body>
+</html>
